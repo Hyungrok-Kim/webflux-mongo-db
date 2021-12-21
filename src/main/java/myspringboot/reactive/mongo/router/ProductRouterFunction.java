@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -17,6 +18,8 @@ public class ProductRouterFunction
     public RouterFunction<ServerResponse> routerFunction(ProductHandler productHandler)
     {
         return route(GET("/router/products"), productHandler::getProducts)
-                .andRoute(GET("/router/products/{id}"), productHandler::getProduct);
+                .andRoute(GET("/router/products/{id}"), productHandler::getProduct)
+                .andRoute(GET("/router/product-range"), productHandler::getProductInRange)
+                .andRoute(POST("/router/products"), productHandler::saveProduct);
     }
 }

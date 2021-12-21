@@ -2,6 +2,7 @@ package myspringboot.reactive.mongo.handler;
 
 import lombok.RequiredArgsConstructor;
 import myspringboot.reactive.mongo.dto.ProductDto;
+import myspringboot.reactive.mongo.entity.Product;
 import myspringboot.reactive.mongo.repository.ProductRepository;
 import myspringboot.reactive.mongo.utils.AppUtils;
 import org.springframework.data.domain.Range;
@@ -54,7 +55,55 @@ public class ProductHandler
         Flux<ProductDto> productDtoFlux = repository.findByPriceBetween(Range.closed(min, max)).map(AppUtils::entityToDto);
 
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
-                                  .body(productDtoFlux, productDto.class)
+                                  .body(productDtoFlux, ProductDto.class)
                                   .switchIfEmpty(response404);
+    }
+
+    public Mono<ServerResponse> saveProduct(ServerRequest request)
+    {
+        //Mono<ProductDto> => Mono<Product>
+        Mono<Product> unSavedProductMono = request.bodyToMono(ProductDto.class).map(AppUtils::dtoToEntity);
+        return unSavedProductMono.flatMap(product -> repository.save(product)
+                                                                .map(AppUtils::entityToDto)
+                                                                .flatMap(savedProductDto -> ServerResponse.accepted()
+                                                                                                            .contentType(MediaType.APPLICATION_JSON)
+                                                                                                            .bodyValue(savedProductDto)
+                                                                )
+                                        ).switchIfEmpty(response406);
+    }
+
+    public Mono<ServerResponse> updateProduct(ServerRequest request)
+    {
+        Mono<Product> unUpdatedProductMono = request.bodyToMono(ProductDto.class).map(AppUtils::dtoToEntity);
+        String id = request.pathVariable("id");
+
+        Mono<ProductDto> updatedProductDtoMono = productMono.flatMap(product ->
+                repository.findById(id)
+                        .flatMap(existProduct -> {
+                            existProduct.setName(product.getName());
+                            if (product.getQty() != 0) {
+                                existProduct.setQty(product.getQty());
+                            }
+                            if (product.getPrice() != 0.0) {
+                                existProduct.setPrice(product.getPrice());
+                            }
+                            return repository.save(existProduct).map(AppUtils::entityToDto);
+                        }));
+
+        return updatedProductDtoMono.flatMap(productDto ->
+                        ServerResponse.accepted()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(productDto)
+                ).switchIfEmpty(response404);
+    }
+
+    public Mono<ServerResponse> deleteProduct(ServerRequest request)
+    {
+        String id = request.pathVariable("id");
+        return repository.findById(id)
+                         .flatMap(existProduct ->
+                                    ServerResponse.ok()
+                                                .build(repository.delete(existProduct))
+                                 ).switchIfEmpty(response404);
     }
 }
