@@ -73,4 +73,14 @@ public class ProductService
                 .map(updProduct -> ResponseEntity.ok(AppUtils.entityToDto(updProduct)))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    public Mono<ResponseEntity<Void>> deleteProduct(String id)
+    {
+        return repository.findById(id)
+                         .flatMap(existProduct ->
+                                    repository.delete(existProduct)
+                                              .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                                 )
+                         .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }
