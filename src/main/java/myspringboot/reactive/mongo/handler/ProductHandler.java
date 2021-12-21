@@ -77,7 +77,7 @@ public class ProductHandler
         Mono<Product> unUpdatedProductMono = request.bodyToMono(ProductDto.class).map(AppUtils::dtoToEntity);
         String id = request.pathVariable("id");
 
-        Mono<ProductDto> updatedProductDtoMono = productMono.flatMap(product ->
+        Mono<ProductDto> updatedProductDtoMono = unUpdatedProductMono.flatMap(product ->
                 repository.findById(id)
                         .flatMap(existProduct -> {
                             existProduct.setName(product.getName());
