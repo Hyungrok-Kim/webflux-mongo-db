@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import myspringboot.reactive.mongo.dto.ProductDto;
 import myspringboot.reactive.mongo.repository.ProductRepository;
 import myspringboot.reactive.mongo.utils.AppUtils;
+import org.springframework.data.domain.Range;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -82,5 +83,16 @@ public class ProductService
                                               .then(Mono.just(ResponseEntity.ok().<Void>build()))
                                  )
                          .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    public Flux<ProductDto> getRegexByName(String name)
+    {
+        return repository.findByName(name)
+                         .map(AppUtils::entityToDto);
+    }
+
+    public Flux<ProductDto> getPriceByRange(double min, double max)
+    {
+        return repository.findByPriceBetween(Range.closed(min, max)).map(AppUtils::entityToDto);
     }
 }
