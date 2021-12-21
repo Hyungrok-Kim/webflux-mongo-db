@@ -17,6 +17,9 @@ public class LogFilter implements WebFilter {
         log.info("Serving '{}'", path);
 
         return chain.filter(exchange).doAfterTerminate(() -> {
+            //exchange.getResponse() => ServerHttpResponse
+            //exchange.getResponse().getHeaders() => HttpHeaders (Map)
+            //exchange.getResponse().getHeaders().entrySet() => Set<Map.Entry<String, List<String>>>
                     exchange.getResponse().getHeaders().entrySet().forEach(e ->
                             log.info("Response Headers '{}' : '{}'",e.getKey(),e.getValue()));
                     log.info("Served '{}' as {} in {} ms",
