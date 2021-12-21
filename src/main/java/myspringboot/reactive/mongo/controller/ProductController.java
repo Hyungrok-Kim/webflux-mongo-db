@@ -56,4 +56,24 @@ public class ProductController
     {
         return service.updateProductRE(productDtoMono, id);
     }
+
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<Void>> deleteProduct(@PathVariable String id)
+    {
+        return service.deleteProduct(id);
+    }
+
+    @GetMapping("/product-range")
+    public Flux<ProductDto> getProductInRange(@RequestParam double min, @RequestParam double max)
+    {
+        return service.getPriceByRange(min, max);
+    }
+
+    @GetMapping("/name")
+    public Flux<ProductDto> getProductByName(@RequestParam String name)
+    {
+        return service.getRegexByName(name);
+    }
+
+
 }
