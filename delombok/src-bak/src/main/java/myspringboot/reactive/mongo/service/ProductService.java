@@ -2,7 +2,6 @@ package myspringboot.reactive.mongo.service;
 
 import lombok.RequiredArgsConstructor;
 import myspringboot.reactive.mongo.dto.ProductDto;
-import myspringboot.reactive.mongo.entity.Product;
 import myspringboot.reactive.mongo.repository.ProductRepository;
 import myspringboot.reactive.mongo.utils.AppUtils;
 import org.springframework.data.domain.Range;
@@ -57,16 +56,6 @@ public class ProductService
 
     public Mono<ProductDto> updateProduct(Mono<ProductDto> productDtoMono, String id)
     {
-        Mono<Product> productMono = productDtoMono.map(AppUtils::dtoToEntity);
-        return productMono.flatMap(product ->
-                                repository.findById(id)
-                                            .flatMap(existProduct -> {
-                                                existProduct.setName(product.getName());
-                                                existProduct.setQty(product.getQty());
-                                                existProduct.setPrice(product.getPrice());
-                                                return repository.save(existProduct).map(AppUtils::entityToDto);
-                                            }));
-/*
         return repository.findById(id)
                          //.flatMap(existProduct -> productDtoMono.map(AppUtils::dtoToEntity))
                          //.flatMap(existProduct -> productDtoMono.map(dto -> AppUtils.dtoToEntity(dto))) //Mono<Product>
@@ -76,7 +65,6 @@ public class ProductService
                          .doOnNext(product -> product.setId(id))
                          .flatMap(repository::save)
                          .map(AppUtils::entityToDto);
- */
     }
 
     public Mono<ResponseEntity<ProductDto>> updateProductRE(Mono<ProductDto> productDtoMono, String id)

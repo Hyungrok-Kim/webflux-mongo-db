@@ -36,4 +36,5 @@ public class MyspringbootReactiveMongoApplication {
 					.subscribe(System.out::println);
 		};
 	}
+
 }
